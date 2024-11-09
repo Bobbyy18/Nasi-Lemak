@@ -1,2 +1,2 @@
-# Nasi-Lemak
+# Nasi-Lemak Project Repository
 Data Communication Final Team Project
