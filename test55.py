@@ -1,1 +1,1 @@
-printf(" sali data comm")
+print(" sali data comm")
