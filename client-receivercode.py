@@ -2,7 +2,7 @@ import socket
 import threading
 
 # Server configuration
-SERVER_IP = '10.121.131.87'
+SERVER_IP = '10.121.131.87' #must allign with server ip address
 SERVER_PORT = 12345
 
 # Function to handle receiving messages from the server

@@ -1,7 +1,7 @@
 import socket
 
 # Server configuration
-SERVER_IP = '10.121.131.87'
+SERVER_IP = '10.121.131.87' #must allign with server ip address
 SERVER_PORT = 12345
 
 # Create a TCP socket
