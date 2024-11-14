@@ -10,10 +10,10 @@ sock.listen(1)
 # Define the food items and their prices
 food_items = {'pizza': 10, 'burger': 8, 'fries': 4, 'soda': 2,'masala dosa':20}
 def calculate_cost(order):
- total_cost = 0
- for item, quanƟty in order.items():
- total_cost += food_items.get(item, 0) * quanƟty
- return total_cost
+    total_cost = 0
+    for item, quanƟty in order.items():
+    total_cost += food_items.get(item, 0) * quanƟty
+    return total_cost
 # Wait for a connecƟon
 print('WaiƟng for a connecƟon...')
 connecƟon, client_address = sock.accept()
