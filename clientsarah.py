@@ -2,8 +2,9 @@ import tkinter as tk
 from tkinter import messagebox
 import socket
 import json
+import threading
 
-host = '10.121.131.119'
+host = '127.0.0.1'
 port = 15123
 
 # List of shops and their respective items
@@ -32,7 +33,16 @@ class CoupangEats:
         self.root = root
         self.root.title("Kodae Store")
         self.cart = {}
+
+        # Socket initialization for both sending and receiving
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client_socket.connect((host, port))  # Connect to the server
         
+        # Start the listener thread to receive broadcast messages
+        self.listener_thread = threading.Thread(target=self.receive_messages)
+        self.listener_thread.daemon = True  # Ensure it exits when the main program exits
+        self.listener_thread.start()
+
         # Shop Selection
         tk.Label(root, text="Select a Shop", font=("Arial", 16)).pack()
         self.selected_shop = tk.StringVar(root)
@@ -47,7 +57,7 @@ class CoupangEats:
         # Menu items frame (initially empty)
         self.menu_frame = tk.Frame(root)
         self.menu_frame.pack()
-        
+
         # Cart and Order Section
         tk.Label(root, text="Your cart", font=("Arial", 16)).pack(pady=10)
         self.cart_display = tk.Text(root, height=10, width=30, state='disabled')
@@ -101,7 +111,7 @@ class CoupangEats:
             total += price
             self.cart_display.insert(tk.END, f"{item} x{quantity} - ₩ {price:,}\n")
         
-        self.cart_display.insert(tk.END, f"\nTotal: ${total / 100:.2f}")
+        self.cart_display.insert(tk.END, f"\nTotal: ₩{total:,}")
         self.cart_display.config(state="disabled")  # Make the display read-only
 
     def place_order(self):
@@ -120,26 +130,32 @@ class CoupangEats:
 
         # Send order to the server
         try:
-            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            client_socket.connect((host, port))
-
             # Send order data as JSON
-            client_socket.send(json.dumps(order_data).encode())
+            self.client_socket.send(json.dumps(order_data).encode())
 
             # Receive response from server
-            response = client_socket.recv(1024).decode()
+            response = self.client_socket.recv(1024).decode()
             response_data = json.loads(response)  # Convert JSON string to dictionary
 
             messagebox.showinfo("Order Status", response_data["message"])
-            client_socket.close()
             self.cart.clear()  # Clear cart after successful order
             self.update_cart_display()
         except socket.error:
             messagebox.showerror("Connection Error", "Could not connect to server.")
 
+    def receive_messages(self):
+        """Receive messages (broadcasts) from the server."""
+        while True:
+            try:
+                message_data = self.client_socket.recv(1024).decode()
+                if message_data:
+                    message = json.loads(message_data)
+                    messagebox.showinfo("Server Message", message["message"])  # Display broadcast message
+            except Exception as e:
+                print("Error receiving message:", e)
+                break
+
 # Run the app
 root = tk.Tk()
 app = CoupangEats(root)
 root.mainloop()
-
-   
