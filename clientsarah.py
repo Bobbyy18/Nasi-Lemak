@@ -3,8 +3,9 @@ from tkinter import messagebox
 import socket
 import json
 import threading
+import queue
 
-host = '127.0.0.1'
+host = '172.20.10.2'
 port = 15123
 
 # List of shops and their respective items
@@ -34,16 +35,17 @@ class CoupangEats:
         self.root.title("Kodae Store")
         self.cart = {}
 
-        # Socket initialization for both sending and receiving
+         # Socket initialization for both sending and receiving
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client_socket.connect((host, port))  # Connect to the server
         
-        # Start the listener thread to receive broadcast messages
+        self.message_queue = queue.Queue()
+
+         # Start the listener thread to receive broadcast messages
         self.listener_thread = threading.Thread(target=self.receive_messages)
-        self.listener_thread.daemon = True  # Ensure it exits when the main program exits
+        self.listener_thread.daemon = True
         self.listener_thread.start()
 
-        # Shop Selection
         tk.Label(root, text="Select a Shop", font=("Arial", 16)).pack()
         self.selected_shop = tk.StringVar(root)
         self.selected_shop.set(shops[0])  # Default selection
@@ -114,6 +116,26 @@ class CoupangEats:
         self.cart_display.insert(tk.END, f"\nTotal: ₩{total:,}")
         self.cart_display.config(state="disabled")  # Make the display read-only
 
+    def receive_messages(self):
+        """Receive both broadcast messages and acknowledgments from the server."""
+        while True:
+            try:
+                message_data = self.client_socket.recv(1024).decode()
+                if message_data:
+                    message = json.loads(message_data)
+                    if message.get("type") == "broadcast":
+                        print("Received broadcast message")
+                        self.message_queue.put(("broadcast", message["message"]))
+                    elif message.get("type") == "response":
+                        print("Received order acknowledgment")
+                        self.message_queue.put(("response", message["message"]))
+            except socket.error as e:
+                print(f"Socket error: {e}")
+                break
+            except Exception as e:
+                print(f"Error receiving message: {e}")
+                break
+
     def place_order(self):
         if not self.cart:
             messagebox.showwarning("Warning", "Your cart is empty!")
@@ -132,28 +154,22 @@ class CoupangEats:
         try:
             # Send order data as JSON
             self.client_socket.send(json.dumps(order_data).encode())
+            print("Order sent:",order_data)
 
-            # Receive response from server
-            response = self.client_socket.recv(1024).decode()
-            response_data = json.loads(response)  # Convert JSON string to dictionary
+            while True:
+                message_type, message = self.message_queue.get()
+                if message_type == "response":
+                    messagebox.showinfo("Order Status", message)
+                    break
+                elif message_type == "broadcast":
+                    messagebox.showinfo("Server Message", message)
+      
 
-            messagebox.showinfo("Order Status", response_data["message"])
             self.cart.clear()  # Clear cart after successful order
             self.update_cart_display()
         except socket.error:
             messagebox.showerror("Connection Error", "Could not connect to server.")
 
-    def receive_messages(self):
-        """Receive messages (broadcasts) from the server."""
-        while True:
-            try:
-                message_data = self.client_socket.recv(1024).decode()
-                if message_data:
-                    message = json.loads(message_data)
-                    messagebox.showinfo("Server Message", message["message"])  # Display broadcast message
-            except Exception as e:
-                print("Error receiving message:", e)
-                break
 
 # Run the app
 root = tk.Tk()
