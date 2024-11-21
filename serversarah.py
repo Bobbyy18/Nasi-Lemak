@@ -49,19 +49,15 @@ def handle_client(client_socket,client_address):
             except:
                 pass
 
-def start_server():
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind(('',port))
-    server_socket.listen(5)
-    print("Server is listening")
 
-    while True:
-        client_socket, client_address = server_socket.accept()
-        print(f"New connection from {client_address}")
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server_socket.bind(('',port))
+server_socket.listen(5)
+print("Server is listening")
 
-        # Start a new thread to handle messages from this client
-        client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
-        client_thread.start()
+while True:
+    client_socket, client_address = server_socket.accept()
+    print(f"New connection from {client_address}")
 
-if __name__ == "__main__":
-    start_server()
+    client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
+    client_thread.start()
