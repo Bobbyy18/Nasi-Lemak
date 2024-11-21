@@ -5,7 +5,7 @@ import json
 import threading
 import queue
 
-host = '172.30.1.102'
+host = '10.121.129.145'
 port = 15123
 
 # List of shops and their respective items
@@ -72,8 +72,6 @@ class CoupangEats:
         self.update_menu(shops[0])
 
     def update_menu(self, shop):
-        self.cart.clear()  # Clear the cart when changing shops
-        self.update_cart_display()  # Update the cart display
 
         # Clear previous menu items
         for widget in self.menu_frame.winfo_children():
@@ -95,25 +93,32 @@ class CoupangEats:
         add_button.pack(side="left")
 
     def add_to_cart(self, item):
+        #updated add_to_cart
         shop = self.selected_shop.get()
-        if item in self.cart:
-            self.cart[item] += 1
+        if shop not in self.cart:
+            self.cart[shop] = {}  # Initialize the shop in the cart
+        if item in self.cart[shop]:
+            self.cart[shop][item] += 1  # Increment quantity if item exists
         else:
-            self.cart[item] = 1
+            self.cart[shop][item] = 1  # Add item with quantity 1
         self.update_cart_display()
 
     def update_cart_display(self):
+        #updated update cart display
         self.cart_display.config(state="normal")
         self.cart_display.delete(1.0, tk.END)  # Clear the display
 
         total = 0
-        shop_items = shops_items[self.selected_shop.get()]
-        for item, quantity in self.cart.items():
-            price = shop_items[item] * quantity
-            total += price
-            self.cart_display.insert(tk.END, f"{item} x{quantity} - ₩ {price:,}\n")
-        
-        self.cart_display.insert(tk.END, f"\nTotal: ₩{total:,}")
+        for shop, items in self.cart.items():
+            self.cart_display.insert(tk.END, f"{shop}:\n")  # Display shop name
+            shop_items = shops_items[shop]
+            for item, quantity in items.items():
+                price = shop_items[item] * quantity
+                total += price
+                self.cart_display.insert(tk.END, f"  {item} x{quantity} - ₩ {price:,}\n")
+            self.cart_display.insert(tk.END, "\n")
+
+        self.cart_display.insert(tk.END, f"Total: ₩{total:,}")
         self.cart_display.config(state="disabled")  # Make the display read-only
 
     def receive_messages(self):
@@ -136,53 +141,38 @@ class CoupangEats:
                 print(f"Error receiving message: {e}")
                 break
 
-
-    def handle_broadcast(self,message):
-        response = messagebox.askquestion("Incoming Order", "Do you want to take this request?")
-        if response == "yes":
-            messagebox.showinfo("Order Details", f"Order Accepted! Details: {message}")
-            try:
-                response_data = {"type": "accept", "details": message}
-                self.client_socket.send(json.dumps(response_data).encode())
-                print("Accepted order details sent to server.")
-            except socket.error as e:
-                print(f"Error sending acceptance to server: {e}")
-        else:
-            print("User declined the order.")
-
-
-    def place_order(self):
+    def place_order(self): #updated place order
         if not self.cart:
             messagebox.showwarning("Warning", "Your cart is empty!")
             return
 
-        # Get the selected shop and prepare order data
-        shop = self.selected_shop.get()
-        shop_items = shops_items[shop]
+        # Prepare order data
         order_data = {
-            "shop": shop,
-            "items": self.cart,
-            "total": sum(shop_items[item] * quantity for item, quantity in self.cart.items())
+            "shops": self.cart,  # Send the entire cart
+            "total": sum(
+                shops_items[shop][item] * quantity
+                    for shop, items in self.cart.items()
+            for item, quantity in items.items()
+            ),
         }
 
         # Send order to the server
         try:
-            # Send order data as JSON
             self.client_socket.send(json.dumps(order_data).encode())
-            print("Order sent:",order_data)
-
+            print("Order sent:", order_data)
             while True:
                 message_type, message = self.message_queue.get()
                 if message_type == "response":
                     messagebox.showinfo("Order Status", message)
                     break
                 elif message_type == "broadcast":
-                    self.handle_broadcast(message)
+                    messagebox.showinfo("Server Message", message)
 
             self.cart.clear()  # Clear cart after successful order
             self.update_cart_display()
         except socket.error:
             messagebox.showerror("Connection Error", "Could not connect to server.")
+
 
 
 # Run the app
