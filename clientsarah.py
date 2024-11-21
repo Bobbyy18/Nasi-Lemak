@@ -126,10 +126,14 @@ class CoupangEats:
                     if message.get("type") == "broadcast":
                         print("Received broadcast message")
                         self.handle_broadcast(message)
+                        '''
                         self.message_queue.put(("broadcast", message["message"]))
+                        '''
                     elif message.get("type") == "response":
                         print("Received order acknowledgment")
+                        '''
                         self.message_queue.put(("response", message["message"]))
+                        '''
             except socket.error as e:
                 print(f"Socket error: {e}")
                 break
