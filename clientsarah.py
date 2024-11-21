@@ -5,7 +5,7 @@ import json
 import threading
 import queue
 
-host = '172.30.1.102'
+host = '10.121.129.228'
 port = 15123
 
 # List of shops and their respective items
@@ -125,6 +125,7 @@ class CoupangEats:
                     message = json.loads(message_data)
                     if message.get("type") == "broadcast":
                         print("Received broadcast message")
+                        self.handle_broadcast(message)
                         self.message_queue.put(("broadcast", message["message"]))
                     elif message.get("type") == "response":
                         print("Received order acknowledgment")
@@ -176,9 +177,10 @@ class CoupangEats:
                 if message_type == "response":
                     messagebox.showinfo("Order Status", message)
                     break
+                '''
                 elif message_type == "broadcast":
                     self.handle_broadcast(message)
-
+                '''
             self.cart.clear()  # Clear cart after successful order
             self.update_cart_display()
         except socket.error:
