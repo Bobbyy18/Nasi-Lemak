@@ -5,7 +5,7 @@ import json
 import threading
 import queue
 
-host = '172.30.1.102'
+host = '10.121.129.228'
 port = 15123
 
 # List of shops and their respective items
