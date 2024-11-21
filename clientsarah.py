@@ -131,6 +131,7 @@ class CoupangEats:
                         '''
                     elif message.get("type") == "response":
                         print("Received order acknowledgment")
+                        messagebox.showinfo("Order Status", message)
                         '''
                         self.message_queue.put(("response", message["message"]))
                         '''
@@ -176,15 +177,15 @@ class CoupangEats:
             self.client_socket.send(json.dumps(order_data).encode())
             print("Order sent:",order_data)
 
-            while True:
+            """while True:
                 message_type, message = self.message_queue.get()
                 if message_type == "response":
                     messagebox.showinfo("Order Status", message)
                     break
-                '''
+                
                 elif message_type == "broadcast":
                     self.handle_broadcast(message)
-                '''
+                """
             self.cart.clear()  # Clear cart after successful order
             self.update_cart_display()
         except socket.error:
