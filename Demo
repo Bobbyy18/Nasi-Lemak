@@ -3,5 +3,5 @@
 -broadcast message is received but wrong target
 2. tried and tested (2nd time) / 21 Nov 2024
 -server side: no message box received but acknowledgement message on terminal received.
-
+-client side: no message box received but acknowledgment message on terminal received. 
 
