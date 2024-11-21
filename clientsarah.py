@@ -141,6 +141,19 @@ class CoupangEats:
                 print(f"Error receiving message: {e}")
                 break
 
+    def handle_broadcast(self,message):
+        response = messagebox.askquestion("Incoming order", "Do you want to take this request?")
+        if response == "yes":
+            messagebox.showinfo("Order Details",f"Order Accepted! Details:{message}")
+            try:
+                response_data={"type":"accept","details":message}
+                self.client_socket.send(json.dumps(response_data).encode())
+                print("Accepted order details sent to server.")
+            except socket.error as e:
+                print(f"Error sending acceptance to server:{e}")
+        else:
+            print("User declined the order.")
+            
     def place_order(self): #updated place order
         if not self.cart:
             messagebox.showwarning("Warning", "Your cart is empty!")
@@ -166,7 +179,7 @@ class CoupangEats:
                     messagebox.showinfo("Order Status", message)
                     break
                 elif message_type == "broadcast":
-                    messagebox.showinfo("Server Message", message)
+                    self.handle_broadcast(message)
 
             self.cart.clear()  # Clear cart after successful order
             self.update_cart_display()
