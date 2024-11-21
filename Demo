@@ -1,6 +1,7 @@
 1. tried and tested client an server code (first time) / 21 Nov 2024 
 - order & order received is successful 
 -broadcast message is received but wrong target
--
+2. tried and tested (2nd time) / 21 Nov 2024
+-server side: no message box received but acknowledgement message on terminal received.
 
 
