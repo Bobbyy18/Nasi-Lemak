@@ -130,10 +130,11 @@ class CoupangEats:
                     message = json.loads(message_data)
                     if message.get("type") == "broadcast":
                         print("Received broadcast message")
-                        self.message_queue.put(("broadcast", message["message"]))
-                    elif message.get("type") == "response":
-                        print("Received order acknowledgment")
-                        self.message_queue.put(("response", message["message"]))
+                        self.handle_broadcast(message)
+                        #self.message_queue.put(("broadcast", message["message"]))
+                    #elif message.get("type") == "response":
+                        #print("Received order acknowledgment")
+                        #self.message_queue.put(("response", message["message"]))
             except socket.error as e:
                 print(f"Socket error: {e}")
                 break
@@ -144,7 +145,7 @@ class CoupangEats:
     def handle_broadcast(self,message):
         response = messagebox.askquestion("Incoming order", "Do you want to take this request?")
         if response == "yes":
-            messagebox.showinfo("Order Details",f"Order Accepted! Details:{message}")
+            messagebox.showinfo("Order Accepted",f"Order Accepted! Details:{message}")
             try:
                 response_data={"type":"accept","details":message}
                 self.client_socket.send(json.dumps(response_data).encode())
@@ -153,7 +154,7 @@ class CoupangEats:
                 print(f"Error sending acceptance to server:{e}")
         else:
             print("User declined the order.")
-            
+
     def place_order(self): #updated place order
         if not self.cart:
             messagebox.showwarning("Warning", "Your cart is empty!")
@@ -174,12 +175,12 @@ class CoupangEats:
             self.client_socket.send(json.dumps(order_data).encode())
             print("Order sent:", order_data)
             while True:
-                message_type, message = self.message_queue.get()
-                if message_type == "response":
+                message_data = self.client_socket.recv(1024).decode()
+                if message_data:
+                    message = json.loads(message_data)
                     messagebox.showinfo("Order Status", message)
                     break
-                elif message_type == "broadcast":
-                    self.handle_broadcast(message)
+        
 
             self.cart.clear()  # Clear cart after successful order
             self.update_cart_display()

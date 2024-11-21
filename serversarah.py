@@ -37,7 +37,7 @@ def handle_client(client_socket,client_address):
                 print("Sending acknowledgement response:", response)
                 client_socket.send(json.dumps(response).encode())
                 
-                runner_message = {"type":"broadcast","status":"info", "message":"Runner Needed!"}
+                runner_message = {"type":"broadcast","status":"info", "message":f"{order}"}
                 broadcast(json.dumps(runner_message), sender_socket=client_socket)
             else:
                 break
