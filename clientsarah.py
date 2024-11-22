@@ -3,9 +3,8 @@ from tkinter import messagebox
 import socket
 import json
 import threading
-import queue
 
-host = '10.121.129.145'
+host = '172.30.1.101'
 port = 15123
 
 # List of shops and their respective items
@@ -38,8 +37,6 @@ class CoupangEats:
          # Socket initialization for both sending and receiving
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client_socket.connect((host, port))  # Connect to the server
-        
-        self.message_queue = queue.Queue()
 
          # Start the listener thread to receive broadcast messages
         self.listener_thread = threading.Thread(target=self.receive_messages)
@@ -130,11 +127,10 @@ class CoupangEats:
                     message = json.loads(message_data)
                     if message.get("type") == "broadcast":
                         print("Received broadcast message")
-                        self.handle_broadcast(message)
-                        #self.message_queue.put(("broadcast", message["message"]))
-                    #elif message.get("type") == "response":
-                        #print("Received order acknowledgment")
-                        #self.message_queue.put(("response", message["message"]))
+                        self.handle_broadcast(message["message"])
+                    elif message.get("type") == "response":
+                        print("Received order acknowledgement")
+                        messagebox.showinfo("Order Status", message["message"])
             except socket.error as e:
                 print(f"Socket error: {e}")
                 break
@@ -142,7 +138,12 @@ class CoupangEats:
                 print(f"Error receiving message: {e}")
                 break
 
+
     def handle_broadcast(self,message):
+        if "Runner has been assigned" in message:
+            messagebox.showinfo("Order Update", "This order has already been assigned")
+            return 
+        
         response = messagebox.askquestion("Incoming order", "Do you want to take this request?")
         if response == "yes":
             messagebox.showinfo("Order Accepted",f"Order Accepted! Details:{message}")
@@ -162,6 +163,7 @@ class CoupangEats:
 
         # Prepare order data
         order_data = {
+            "type":"order",
             "shops": self.cart,  # Send the entire cart
             "total": sum(
                 shops_items[shop][item] * quantity
@@ -174,13 +176,6 @@ class CoupangEats:
         try:
             self.client_socket.send(json.dumps(order_data).encode())
             print("Order sent:", order_data)
-            while True:
-                message_data = self.client_socket.recv(1024).decode()
-                if message_data:
-                    message = json.loads(message_data)
-                    messagebox.showinfo("Order Status", message)
-                    break
-        
 
             self.cart.clear()  # Clear cart after successful order
             self.update_cart_display()
