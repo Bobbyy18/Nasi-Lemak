@@ -4,7 +4,9 @@ import socket
 import json
 import threading
 
-host = '172.30.1.101'
+RUNNER_FEE = 2000  # ₩2,000 per order
+
+host = '192.168.219.101'
 port = 15123
 
 # List of shops and their respective items
@@ -114,7 +116,10 @@ class CoupangEats:
                 total += price
                 self.cart_display.insert(tk.END, f"  {item} x{quantity} - ₩ {price:,}\n")
             self.cart_display.insert(tk.END, "\n")
+            
+        total += RUNNER_FEE
 
+        self.cart_display.insert(tk.END, f"Runner Fee: ₩{RUNNER_FEE:,}\n")    
         self.cart_display.insert(tk.END, f"Total: ₩{total:,}")
         self.cart_display.config(state="disabled")  # Make the display read-only
 
@@ -165,11 +170,12 @@ class CoupangEats:
         order_data = {
             "type":"order",
             "shops": self.cart,  # Send the entire cart
+            "runner_fee": RUNNER_FEE,  # Include the flat runner fee
             "total": sum(
                 shops_items[shop][item] * quantity
                     for shop, items in self.cart.items()
             for item, quantity in items.items()
-            ),
+            )+ RUNNER_FEE,  # Add the flat runner fee to the total
         }
 
         # Send order to the server
