@@ -6,7 +6,7 @@ import threading
 
 RUNNER_FEE = 2000  # ₩2,000 per order
 
-host = '192.168.219.101'
+host = '192.168.0.149' # change referring to server's IP Address
 port = 15123
 
 # List of shops and their respective items
@@ -36,6 +36,9 @@ class CoupangEats:
         self.root.title("Kodae Store")
         self.cart = {}
 
+        # Set background color of the window
+        self.root.config(bg="maroon")
+
          # Socket initialization for both sending and receiving
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client_socket.connect((host, port))  # Connect to the server
@@ -45,27 +48,33 @@ class CoupangEats:
         self.listener_thread.daemon = True
         self.listener_thread.start()
 
-        tk.Label(root, text="Select a Shop", font=("Arial", 16)).pack()
+        tk.Label(root, text="Select a Shop", font=("Arial", 16), bg="maroon", fg="white").pack()
         self.selected_shop = tk.StringVar(root)
         self.selected_shop.set(shops[0])  # Default selection
         shops_menu = tk.OptionMenu(root, self.selected_shop, *shops, command=self.update_menu)
+        shops_menu.config(bg="yellow", fg="black")
         shops_menu.pack(pady=10)
 
         # Menu Label
-        self.menu_label = tk.Label(root, text="Menu", font=("Arial", 16))
+        self.menu_label = tk.Label(root, text="Menu", font=("Arial", 16),bg="maroon", fg="white")
         self.menu_label.pack()
 
         # Menu items frame (initially empty)
-        self.menu_frame = tk.Frame(root)
+        self.menu_frame = tk.Frame(root, bg="maroon")
         self.menu_frame.pack()
 
         # Cart and Order Section
-        tk.Label(root, text="Your cart", font=("Arial", 16)).pack(pady=10)
-        self.cart_display = tk.Text(root, height=10, width=30, state='disabled')
+        tk.Label(root, text="Your cart", font=("Arial", 16), bg="maroon", fg="white").pack(pady=10)
+        self.cart_display = tk.Text(root, height=10, width=30, state='disabled', bg="white", fg="black")
         self.cart_display.pack()
 
-        orderButton = tk.Button(root, text="Place Order", command=self.place_order)
+        # Place Order Button
+        orderButton = tk.Button(root, text="Place Order", command=self.place_order, bg="yellow", fg="black")
         orderButton.pack(pady=10)
+
+        # Done Button to close the connection
+        done_button = tk.Button(root, text="Done", command=self.close_connection, bg="orange", fg="black")
+        done_button.pack(pady=10)
 
         # Initialize with the first shop's menu
         self.update_menu(shops[0])
@@ -188,6 +197,19 @@ class CoupangEats:
         except socket.error:
             messagebox.showerror("Connection Error", "Could not connect to server.")
 
+    def close_connection(self):
+        try:
+            # Send a message to the server indicating the client is disconnecting
+            disconnect_message = {"type": "disconnect"}
+            self.client_socket.send(json.dumps(disconnect_message).encode())
+            print("Disconnect message sent to the server.")
+        except socket.error as e:
+            print(f"Error sending disconnect message: {e}")
+        finally:
+            # Close the socket and exit the app
+            self.client_socket.close()
+            print("Connection closed.")
+            self.root.destroy()
 
 
 # Run the app
