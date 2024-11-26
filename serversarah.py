@@ -43,7 +43,7 @@ def handle_client(client_socket,client_address):
                 if message.get("type") == "order":
                     print("Order received:",message)
         
-                    response = {"type":"response", "status":"success","message":"Order received"}
+                    response = {"type":"response", "status":"success","message":"Order received by Runner!"}
                     print("Sending acknowledgement response:", response)
                     client_socket.send(json.dumps(response).encode())
                     if not broadcast_taken:
@@ -59,11 +59,15 @@ def handle_client(client_socket,client_address):
                         stop_broadcast = {"type":"broadcast","status":"info","message":"Runner has been assigned."}
                         broadcast(stop_broadcast, sender_socket=client_socket)
                     else:
-                        print("Broadcast already taken ignoring further accept")
+                        print("Broadcast already taken, ignoring further accept")
             else:
                 break
             broadcast_taken = False #resetting
             current_broadcast = None
+    
+    except (ConnectionResetError, ConnectionAbortedError): # server can handle both graceful and abrupt disconnections without leaving dangling resources.
+        print(f"Connection with {client_address} was reset or aborted.")
+    
     finally:
         print(f"Connection to {client_address} closed.")
         try:
