@@ -6,13 +6,18 @@ import threading
 
 RUNNER_FEE = 2000  # ₩2,000 per order
 
-host = '192.168.0.149' # change referring to server's IP Address
+host = '192.168.219.104' # change referring to server's IP Address
 port = 15123
 
 # List of shops and their respective items
-shops = ["Mom's Touch", "Unistore", "EMart"]
+shops = ["Ari Cafe Media Hall", "Mom's Touch", "Unistore", "EMart", "Pound Coffee"]
 
 shops_items = {
+    "Ari Cafe Media Hall": {
+        "Choco Latte": 3000,
+        "Hibiscus Lemonade": 3800,
+        "Green Tea Latte": 3000
+    },
     "Mom's Touch": {
         "Fried Chicken": 9900,
         "Yangnyeom Chicken": 10900,
@@ -27,6 +32,11 @@ shops_items = {
         "Ice Cream": 1500,
         "Bread": 2000,
         "Coffee": 3500
+    },
+    "Pound Coffee": {
+        "Iced Americano": 2500,
+        "Coffee Latte": 3000,
+        "Coffee Cream Latte": 3800
     }
 }
 
@@ -101,7 +111,6 @@ class CoupangEats:
         add_button.pack(side="left")
 
     def add_to_cart(self, item):
-        #updated add_to_cart
         shop = self.selected_shop.get()
         if shop not in self.cart:
             self.cart[shop] = {}  # Initialize the shop in the cart
@@ -112,7 +121,6 @@ class CoupangEats:
         self.update_cart_display()
 
     def update_cart_display(self):
-        #updated update cart display
         self.cart_display.config(state="normal")
         self.cart_display.delete(1.0, tk.END)  # Clear the display
 
