@@ -41,3 +41,74 @@ Cisco:
 Result 
 -Screenshot of GUI 
 -Notification for Server and Client
+
+__________________________________________________________________________________
+clientsarah.py
+
+### Key Features Explained
+
+#### **Graphical User Interface (GUI):**
+1. **Shop Selection:**  
+   - A dropdown menu allows the user to select from predefined shops (e.g., "Ari Cafe Media Hall").  
+   - Dynamically updates the menu based on the selected shop.
+
+2. **Menu Display and Cart Management:**  
+   - The items from the selected shop are displayed with their prices.  
+   - Each item has an "Add" button to add it to the cart.  
+   - The cart dynamically updates to show selected items, quantities, prices, runner fee, and the total cost.
+
+3. **Location Selection:**  
+   - A dropdown menu lets users choose their current location (e.g., "Aegineung Student Hall").  
+   - Ensures the runner knows where to deliver the order.
+
+4. **Order Placement:**  
+   - A "Place Order" button sends the order details, including location, items, runner fee, and total cost, to the server.  
+   - The cart is cleared after the order is successfully placed.
+
+5. **Order Status and Notifications:**  
+   - Real-time messages (e.g., order acknowledgment or runner status) are displayed via pop-ups.
+
+6. **Connection Management:**  
+   - A "Done" button allows users to close the app and disconnect from the server gracefully.
+
+---
+
+#### **Broadcast Messages and Notifications:**
+1. **Receiving Broadcast Messages:**  
+   - The app listens for incoming messages from the server in a separate thread to avoid freezing the GUI.  
+   - If a broadcast message about a new order is received, the user is notified with a dialog box.
+
+2. **Runner Acceptance Notification:**  
+   - When the user receives an order notification, they can choose to accept or decline.  
+   - If accepted, the app sends a confirmation back to the server.
+
+3. **Acknowledgment Messages:**  
+   - Upon placing an order, users receive real-time feedback on the status of their request (e.g., "Runner Found!").  
+
+---
+
+#### **Location of Received Orders:**
+1. **Order Details for Runners:**  
+   - When a runner receives a broadcast message for a new order, the notification includes the location of the requester (e.g., "Aegineung Student Hall") and the ordered items.  
+   - This allows the runner to decide whether to accept the order.
+
+2. **Delivery Point:**  
+   - The selected location by the requester ensures clarity about where the items need to be delivered.
+
+---
+
+#### **Real-Time Interaction Flow:**
+1. **Request Creation:**  
+   - The requester selects a shop, adds items to the cart, and selects a delivery location.  
+   - The app sends these details to the server upon order placement.
+
+2. **Broadcasting Orders:**  
+   - The server broadcasts the order to all connected clients.  
+   - Interested runners are notified and can accept the order.
+
+3. **Acknowledgments:**  
+   - Once a runner accepts the order, a broadcast notification informs all other clients that the request has been fulfilled.
+
+---
+________________________________________
+serversarah.py
