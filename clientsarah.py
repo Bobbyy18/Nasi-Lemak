@@ -6,14 +6,14 @@ import threading
 
 RUNNER_FEE = 2000  # ₩2,000 per order
 
-host = '172.20.10.2' # change referring to server's IP Address
+host = '10.121.131.23' # change referring to server's IP Address
 port = 15123
 
 
-locations = ["Aegineung Student Hall","Science Library","Informatics Hall"]
+locations = ["Aegineung Student Hall","Science Library","Informatics Hall", "Woodang Hall", "International Studies Hall"]
 
 # List of shops and their respective items
-shops = ["Ari Cafe Media Hall", "Mom's Touch", "Unistore", "EMart", "Pound Coffee"]
+shops = ["Ari Cafe Media Hall", "Mom's Touch", "Unistore", "EMart", "Pound Coffee", "GS25"]
 
 shops_items = {
     "Ari Cafe Media Hall": {
@@ -40,10 +40,15 @@ shops_items = {
         "Iced Americano": 2500,
         "Coffee Latte": 3000,
         "Coffee Cream Latte": 3800
+    },
+    "GS25": {
+        "Seoul Milk": 1500,
+        "Kinder Bueno": 1900,
+        "Tuna Kimbap": 2000
     }
 }
 
-class CoupangEats:
+class KURunner:
     def __init__(self, root):
         self.root = root
         self.root.title("Kodae Store")
@@ -210,8 +215,9 @@ class CoupangEats:
 
         # Send order to the server
         try:
-            self.client_socket.send(json.dumps(order_data).encode())
-            print("Order sent:", order_data)
+            formatted_order_data = json.dumps(order_data, indent=4)
+            self.client_socket.send(formatted_order_data.encode())
+            print("Order sent:\n", formatted_order_data)
 
             self.cart.clear()  # Clear cart after successful order
             self.update_cart_display()
@@ -236,5 +242,5 @@ class CoupangEats:
 
 # Run the app
 root = tk.Tk()
-app = CoupangEats(root)
+app = KURunner(root)
 root.mainloop()
