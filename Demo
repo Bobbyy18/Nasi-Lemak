@@ -4,4 +4,9 @@
 2. tried and tested (2nd time) / 21 Nov 2024
 -server side: no message box received but acknowledgement message on terminal received.
 -client side: no message box received but acknowledgment message on terminal received. 
+3. 28 Nov 2024
+-server side: message box received and details of order are displayed on server
+- eventhough one runner has accepted the request, the other runner still can accept the order 
+- client side: for the interface, colour changed to kodae theme and more restaurant and places added.
+- broadcast message is still failed, so no synchronization between 2 clients.
 
