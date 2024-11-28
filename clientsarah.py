@@ -6,8 +6,11 @@ import threading
 
 RUNNER_FEE = 2000  # ₩2,000 per order
 
-host = '192.168.219.104' # change referring to server's IP Address
+host = '172.20.10.2' # change referring to server's IP Address
 port = 15123
+
+
+locations = ["Aegineung Student Hall","Science Library","Informatics Hall"]
 
 # List of shops and their respective items
 shops = ["Ari Cafe Media Hall", "Mom's Touch", "Unistore", "EMart", "Pound Coffee"]
@@ -72,6 +75,13 @@ class CoupangEats:
         # Menu items frame (initially empty)
         self.menu_frame = tk.Frame(root, bg="maroon")
         self.menu_frame.pack()
+
+        tk.Label(root, text="Select your location", font=("Arial",16), bg="maroon", fg="white").pack(pady=10)
+        self.selected_location = tk.StringVar(root)
+        self.selected_location.set(locations[0])
+        location_menu = tk.OptionMenu(root,self.selected_location, *locations)
+        location_menu.config(bg="yellow",fg="black")
+        location_menu.pack(pady=10)
 
         # Cart and Order Section
         tk.Label(root, text="Your cart", font=("Arial", 16), bg="maroon", fg="white").pack(pady=10)
@@ -153,6 +163,7 @@ class CoupangEats:
                     elif message.get("type") == "response":
                         print("Received order acknowledgement")
                         messagebox.showinfo("Order Status", message["message"])
+                        
             except socket.error as e:
                 print(f"Socket error: {e}")
                 break
@@ -162,7 +173,8 @@ class CoupangEats:
 
 
     def handle_broadcast(self,message):
-        if "Runner has been assigned" in message:
+        if "Runner Found!" in message:
+            print("Runner found. Broadcast stop")
             messagebox.showinfo("Order Update", "This order has already been assigned")
             return 
         
@@ -186,6 +198,7 @@ class CoupangEats:
         # Prepare order data
         order_data = {
             "type":"order",
+            "location":self.selected_location.get(),
             "shops": self.cart,  # Send the entire cart
             "runner_fee": RUNNER_FEE,  # Include the flat runner fee
             "total": sum(
@@ -211,11 +224,12 @@ class CoupangEats:
             disconnect_message = {"type": "disconnect"}
             self.client_socket.send(json.dumps(disconnect_message).encode())
             print("Disconnect message sent to the server.")
+    
         except socket.error as e:
             print(f"Error sending disconnect message: {e}")
+
         finally:
-            # Close the socket and exit the app
-            self.client_socket.close()
+            # Exit app
             print("Connection closed.")
             self.root.destroy()
 

@@ -42,7 +42,6 @@ def handle_client(client_socket,client_address):
 
                 if message.get("type") == "order":
                     print("Order received:",message)
-        
                     response = {"type":"response", "status":"success","message":"Order received by Runner!"}
                     print("Sending acknowledgement response:", response)
                     client_socket.send(json.dumps(response).encode())
@@ -56,12 +55,18 @@ def handle_client(client_socket,client_address):
                     if not broadcast_taken:
                         broadcast_taken = True
                         print(f"Request accepted by client:{client_address}")
-                        stop_broadcast = {"type":"broadcast","status":"info","message":"Runner has been assigned."}
+                        stop_broadcast = {"type":"broadcast","status":"info","message":"Runner Found!"}
                         broadcast(stop_broadcast, sender_socket=client_socket)
                     else:
                         print("Broadcast already taken, ignoring further accept")
+
+                elif message.get("type") == "disconnect":
+                    print("Client wants to disconnect")
+                    break
+
             else:
                 break
+            
             broadcast_taken = False #resetting
             current_broadcast = None
     
