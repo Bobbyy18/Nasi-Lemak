@@ -34,9 +34,10 @@ def receive_messages(sock):
                     show_incoming_order(order)
 
         except:
-            print("Disconnected from server.")
+            pass
+            """print("Disconnected from server.")
             sock.close()
-            break
+            break"""
 
 # Function to show notification pop-up when a message is received
 def show_incoming_order(order):
@@ -56,6 +57,7 @@ def connect_to_server():
     receiver_thread = threading.Thread(target=receive_messages, args=(client_socket,))
     receiver_thread.daemon = True  # This makes the thread exit when the main program exits
     receiver_thread.start()
+    print("Connected to server.")
 
 # Functions to handle button actions for rice and bread
 def increase_rice():

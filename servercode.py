@@ -33,6 +33,7 @@ def handle_client(client_socket, client_address):
         try:
             # Receive message from a client
             message = client_socket.recv(1024)
+
             if message:
                 message = message.decode()
                 
@@ -59,6 +60,10 @@ def handle_client(client_socket, client_address):
                     # Broadcast the order to all other clients
                     broadcast(message, client_socket)
 
+            """# Reset for the next round of orders
+            accepted_clients = set()
+            current_order = None  # Reset current order""" 
+
         except Exception as e:
             # If there's an error with the client connection, log and remove it
             print(f"Error with client {client_address[0]}, {client_address[1]}: {e}")
@@ -66,10 +71,6 @@ def handle_client(client_socket, client_address):
                 clients.remove(client_socket)
                 client_socket.close()
             break
-        
-        """# Reset for the next round of orders
-        accepted_clients = set()
-        current_order = None  # Reset current order"""
 
 # Set up server
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
