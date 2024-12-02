@@ -87,7 +87,7 @@ clientsarah.py
 
 ---
 
-#### **Location of Received Orders:**
+#### **Location of Received Orders:**#DONE#
 1. **Order Details for Runners:**  
    - When a runner receives a broadcast message for a new order, the notification includes the location of the requester (e.g., "Aegineung Student Hall") and the ordered items.  
    - This allows the runner to decide whether to accept the order.
