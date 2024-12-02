@@ -10,6 +10,18 @@ clients = []
 accepted_clients = set()  # To keep track of clients who have accepted an order
 current_order = ""  # Initialize the global variable to hold the current order
 
+"""def handle_new_order(order_details):
+    global accepted_clients, current_order
+
+    # Reset state for the new order
+    accepted_clients = set()
+    current_order = None
+
+    # Set the new order details
+    current_order = order_details
+
+    handle_client(client_socket, client_address)"""
+
 # Function to handle broadcasting messages to all clients except the sender
 def broadcast(message, sender_socket):
     for client_socket in clients:
