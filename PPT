@@ -47,7 +47,7 @@ clientsarah.py
 
 ### Key Features Explained
 
-#### **Graphical User Interface (GUI):**
+#### **Graphical User Interface (GUI):**#DONE#
 1. **Shop Selection:**  
    - A dropdown menu allows the user to select from predefined shops (e.g., "Ari Cafe Media Hall").  
    - Dynamically updates the menu based on the selected shop.
