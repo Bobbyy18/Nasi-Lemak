@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 # Server configuration
-SERVER_IP = '172.20.10.2'  # Must align with server IP address
+SERVER_IP = '172.30.1.102'  # Must align with server IP address
 SERVER_PORT = 12153
 
 # Variables to hold quantities and prices of items
@@ -47,6 +47,7 @@ def receive_messages(sock):
                     response = messagebox.askquestion("Order Status", f"{message}")
                     if response == "yes":
                         client_socket.send("received".encode()) 
+                        print("Sent yes to confirm received order")
                     else:
                         client_socket.send("not received".encode())
 
@@ -117,7 +118,7 @@ def send_order():
     if rice_qty == 0 and bread_qty == 0:
         messagebox.showwarning("Invalid Order", "Please select at least one item before sending the order.")
         return
-    order = f"Rice: {rice_qty} x ₩{rice_price}, Bread: {bread_qty} x ₩{bread_price}, Total: ₩{total_cost}"
+    order = f"ORDER -> Rice: {rice_qty} x ₩{rice_price}, Bread: {bread_qty} x ₩{bread_price}, Total: ₩{total_cost}"
     client_socket.send(order.encode())
     print(f"Order sent to server: {order}")
     show_order_sent()
