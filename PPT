@@ -73,7 +73,7 @@ clientsarah.py
 
 ---
 
-#### **Broadcast Messages and Notifications:**
+#### **Broadcast Messages and Notifications:**#done#
 1. **Receiving Broadcast Messages:**  
    - The app listens for incoming messages from the server in a separate thread to avoid freezing the GUI.  
    - If a broadcast message about a new order is received, the user is notified with a dialog box.
