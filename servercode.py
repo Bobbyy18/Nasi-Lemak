@@ -69,33 +69,33 @@ def handle_client(client_socket, client_address):
                             customer_socket.send("Your order has been accepted by a runner".encode())
                             print(f"Message sent to customer of order {order_id}")
 
-                    current_order = None
-                    accepted_clients = set()
-
             elif message == "reject":
                 print(f"Request rejected by {client_address[0]}, {client_address[1]}")
             
             elif message == "disconnect":
                 print("Client wants to disconnect")
-                if client_socket in order_list:
+                found_order = False
 
-                    for order_id, order in order_list.items():
-                        if client_socket == order.get("runner"):
-                            client_socket = order["runner"]
-                            runner_socket = client_socket
+                for order_id, order in order_list.items():
+                    if client_socket == order.get("runner"):
+                        found_order = True
+                        runner_socket = order.get("runner")
+                        customer_socket = order.get("customer")
 
-                            client_socket = order.get("customer")
-                            customer_socket = client_socket
-
-                            runner_socket.send("Have you finished the request?")
+                        try:
+                            runner_socket.send("Have you finished the request?".encode())
                             confirmation = runner_socket.recv(1024).decode()
                             
                             if confirmation == "yes":
                                 customer_socket.send("Have you received your order?".encode())
                                 orderConfirmation = customer_socket.recv(1024).decode()
+                                print("Received order confirmation")
 
-                                if orderConfirmation == "yes":
+                                if orderConfirmation == "received":
                                     runner_socket.send("You have successfully finished a request. Runner fee is rewarded".encode())
+                                    order_list[order_id]["status"] = "completed"
+                                    print(f"Order {order_id} completed")
+                                    print(order_list)
 
                                     if runner_socket in clients:
                                         clients.remove(runner_socket)
@@ -105,29 +105,38 @@ def handle_client(client_socket, client_address):
                                     runner_socket.close()
                                     customer_socket.close()
 
-                                    order_list[order_id]["status"] = "completed"
-                                    print(f"Order {order_id} completed")
-                                    print(order_list)
+                                else:
+                                    runner_socket.send("Please complete the request".encode())
+
                             else:
                                 runner_socket.send("Please complete the request before disconnecting".encode())
 
-                        elif client_socket == order.get("customer"):
-                            customer_socket = order["customer"]
-                            runner_socket = order["runner"]
+                        except Exception as e:
+                            print(f"Error handling runner disconnect: {e}")
 
-                            runner_socket.send("You have successfully finished a request. Runner fee is rewarded".encode())
+
+                    elif client_socket == order.get("customer"):
+                            found_order = True
+                            customer_socket = order.get("customer")
+                            runner_socket = order.get("runner")
+
+                            if runner_socket:
+                                runner_socket.send("You have successfully finished a request. Runner fee is rewarded".encode())
 
                             if customer_socket in clients:
                                 clients.remove(customer_socket)
+                                customer_socket.send("Done".encode())
                                 customer_socket.close()
                             
                             print(f"Customer for order{order_id} has been disconnected")
                             break
 
-                else:
-                    clients.remove(client_socket)
-                    client_socket.close()
-                    break
+                    if not found_order:
+                            if client_socket in clients:
+                                clients.remove(client_socket)
+                                client_socket.send("Done".encode())
+                            client_socket.close()
+                            break
                 
             else:
                 # Print the received order with the client's IP and port

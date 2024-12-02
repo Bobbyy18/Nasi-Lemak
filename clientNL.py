@@ -20,17 +20,6 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 def receive_messages(sock):
     while True:
         try:
-<<<<<<< Updated upstream
-            message = sock.recv(1024)
-            if message:
-                order = message.decode()
-                if order == "Request has been accepted by another runner.":
-                    messagebox.showinfo("Notification", order)
-                elif "You accepted the order." in order:
-                    messagebox.showinfo("Notification", order)
-                else:
-                    show_incoming_order(order)
-=======
             # Receive message from the server
             message = sock.recv(1024).decode()
             if message:
@@ -48,20 +37,33 @@ def receive_messages(sock):
                     print("Order is received by runner")
 
                 elif "Have you finished the request?" in message:
-                    response = messagebox.askquestion("Order Status", f"{message}?")
+                    response = messagebox.askquestion("Order Status", f"{message}")
                     if response == "yes":
-                        client_socket.send("yes".encode())  # Notify server that the order is accepted
+                        client_socket.send("yes".encode())  
                     else:
                         client_socket.send("no".encode())
 
+                elif "Have you received your order?" in message:
+                    response = messagebox.askquestion("Order Status", f"{message}")
+                    if response == "yes":
+                        client_socket.send("received".encode()) 
+                    else:
+                        client_socket.send("not received".encode())
+
+
                 elif "You have successfully finished a request. Runner fee is rewarded" in message:
+                    messagebox.showinfo("Order status",f"{message}")
+                    print("Request finished")
+                    exit_program()
+                
+                elif "Done" in message:
+                    print("Exiting")
                     exit_program()
 
                 else:
                     # Show notification about the received order
                     show_incoming_order(message)
 
->>>>>>> Stashed changes
         except:
             pass
 
@@ -126,8 +128,7 @@ def show_order_sent():
 
 def disconnect():
     client_socket.send("disconnect".encode())
-    print("disconnected")
-    exit_program()
+    print(" sending request to disconnect")
 
 # Function to exit the program
 def exit_program():
