@@ -4,8 +4,8 @@ import tkinter as tk
 from tkinter import messagebox
 
 # Server configuration
-SERVER_IP = '192.168.0.149'  # Must align with server IP address
-SERVER_PORT = 12345
+SERVER_IP = '172.20.10.2'  # Must align with server IP address
+SERVER_PORT = 12153
 
 # Variables to hold quantities and prices of items
 rice_qty = 0
@@ -20,6 +20,7 @@ client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 def receive_messages(sock):
     while True:
         try:
+<<<<<<< Updated upstream
             message = sock.recv(1024)
             if message:
                 order = message.decode()
@@ -29,6 +30,38 @@ def receive_messages(sock):
                     messagebox.showinfo("Notification", order)
                 else:
                     show_incoming_order(order)
+=======
+            # Receive message from the server
+            message = sock.recv(1024).decode()
+            if message:
+
+                if message == "Request has been accepted by another runner." :
+                    messagebox.showinfo("Notification", message)
+                    print("Failed to accept request")
+
+                elif "You accepted the order. " in message:
+                    messagebox.showinfo("Notification", message)
+                    print("Accepted request")
+
+                elif "Your order has been accepted by a runner" in message:
+                    messagebox.showinfo("Notification", message)
+                    print("Order is received by runner")
+
+                elif "Have you finished the request?" in message:
+                    response = messagebox.askquestion("Order Status", f"{message}?")
+                    if response == "yes":
+                        client_socket.send("yes".encode())  # Notify server that the order is accepted
+                    else:
+                        client_socket.send("no".encode())
+
+                elif "You have successfully finished a request. Runner fee is rewarded" in message:
+                    exit_program()
+
+                else:
+                    # Show notification about the received order
+                    show_incoming_order(message)
+
+>>>>>>> Stashed changes
         except:
             pass
 
@@ -91,9 +124,13 @@ def send_order():
 def show_order_sent():
     messagebox.showinfo("Order Sent", "Your order has been successfully sent.")
 
+def disconnect():
+    client_socket.send("disconnect".encode())
+    print("disconnected")
+    exit_program()
+
 # Function to exit the program
 def exit_program():
-    client_socket.close()
     root.quit()
 
 # Create the main window (root)
@@ -134,7 +171,7 @@ total_label.pack(pady=10)
 send_order_button = tk.Button(root, text="Send Order", font=("Arial", 14), command=send_order)
 send_order_button.pack(pady=20)
 
-exit_button = tk.Button(root, text="EXIT", font=("Arial", 14), command=exit_program)
+exit_button = tk.Button(root, text="EXIT", font=("Arial", 14), command=disconnect)
 exit_button.pack(pady=10)
 
 # Connect to the server
