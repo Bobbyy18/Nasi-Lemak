@@ -1,10 +1,10 @@
 import socket
 import threading
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox, ttk
 
 # Server configuration
-SERVER_IP = '172.30.1.56'  # Must align with server IP address
+SERVER_IP = '192.168.219.104'  # Must align with server IP address
 SERVER_PORT = 12153
 
 # Variables to hold quantities and prices of items in cart
@@ -77,33 +77,56 @@ def update_total():
     total_cost = sum(item['price'] * item['quantity'] for item in cart)
     total_cost += runner_fee  # Add runner fee
     total_label.config(text=f"Total: ₩{total_cost}")
-
-# Function to add an item to the cart
-def add_to_cart(item_name, price):
-    for item in cart:
-        if item['name'] == item_name:
-            item['quantity'] += 1
-            update_total()
+    
+#Function to add to cart   
+def add_to_cart(item, price):
+    # Check if the item already exists in the cart
+    for cart_item in cart:
+        if cart_item['name'] == item:  # Check by item name
+            cart_item['quantity'] += 1  # Increment quantity
+            update_cart_display()  # Update the display
             return
-    cart.append({'name': item_name, 'price': price, 'quantity': 1})
-    update_total()
+
+    # If item is not found, add it as a new entry (as a dictionary)
+    cart.append({'name': item, 'price': price, 'quantity': 1})
+    update_cart_display()  # Update the display
 
 # Function to remove an item from the cart
 def remove_from_cart(item_name):
     global cart
     cart = [item for item in cart if item['name'] != item_name]
     update_total()
-
-# Function to send the order to the server
+    
 def send_order():
     if not cart:
         messagebox.showwarning("Invalid Order", "Please select at least one item before sending the order.")
         return
+    
     order = "ORDER -> "
-    for item in cart:
-        order += f"{item['name']}: {item['quantity']} x ₩{item['price']}, "
-    total_cost = sum(item['price'] * item['quantity'] for item in cart) + runner_fee
+    total_cost = 0  # Initialize total cost
+
+    # Iterate over the cart
+    for cart_item in cart:
+        # Extract item details
+        item_name = cart_item['name']
+        item_price = cart_item['price']
+        item_quantity = cart_item['quantity']
+        item_total = item_price * item_quantity  # Total for this item
+
+        # Add to the order string
+        order += f"{item_name}: {item_quantity} x ₩{item_price}, "
+        
+        # Add to the total cost
+        total_cost += item_total
+
+    # Add runner fee to total
+    runner_fee = 2000
+    total_cost += runner_fee
+
+    # Add the total cost to the order string
     order += f"Total: ₩{total_cost}"
+
+    # Send the order to the server
     client_socket.send(order.encode())
     print(f"Order sent to server: {order}")
     show_order_sent()
@@ -120,46 +143,79 @@ def disconnecting():
 def exit_program():
     root.quit()
 
-# Function to populate shop items based on shop selection
-def update_items(shop_name):
-    for widget in items_frame.winfo_children():
-        widget.destroy()
+# Example shop data: available items with prices
+shops = {
+    "Mom's Touch": [('Fried Chicken', 9900), ('Yangnyeom Chicken', 10900), ('Soy Garlic Chicken', 10900)],
+    "Ari Cafe Media Hall": [('Choco Latte', 3000), ('Hibiscus Lemonade', 3800), ('Green Tea Latte', 3200)],
+    "Unistore": [('Pen', 3000), ('Book', 5000), ('Bottle', 5000)],
+    "EMart": [('Ice Cream', 1500), ('Bread', 3000), ('Coffee', 3500)],
+    "Pound Coffee": [('Iced Americano', 2500), ('Coffee Latte', 3000), ('Coffee Cream Latte', 3800)],
+    "GS25": [('Seoul Milk', 1500), ('Kinder Bueno', 1900), ('Tuna Kimbap', 2000)],
+}
+# Function to update item buttons based on the selected shop
+def update_item_buttons(shop_name):
+    for widget in item_frame.winfo_children():
+        widget.destroy()  # Clear previous items
 
-    items = {
-        'Moms TouchShop 1': [('Fried Chicken', 9900), ('Yangnyeom Chicken', 10900), ('Soy Garlic Chicken', 10900)],
-        'Ari Cafe Media Hall': [('Choco Latte', 3000), ('Hibiscus Lemonade', 3800), ('Green Tea Latte', 3200)],
-        'Unistore': [('Pen', 3000), ('Book', 5000), ('Bottle', 5000)],
-        'EMart': [('Ice Cream', 1500), ('Bread', 3000), ('Coffee', 3500)],
-        'Pound Coffee': [('Iced Americano', 2500), ('Coffee Latte', 3000), ('Coffee Cream Latte', 3800)],
-        'GS25': [('Seoul Milk', 1500), ('Kinder Bueno', 1900), ('Tuna Kimbap', 2000)],
-        
-    }
+    if shop_name in shops:
+        for item, price in shops[shop_name]:
+            item_button = tk.Button(item_frame, text=f"{item} - ₩{price}", font=("Arial", 12),
+                                    command=lambda item=item, price=price: add_to_cart(item, price))
+            item_button.pack(fill="x", pady=5)
+            
+# Function to handle dropdown selection change
+def on_shop_select(event):
+    shop_name = shop_dropdown.get()  # Get the selected shop
+    update_item_buttons(shop_name)  # Update the available items based on selected shop
 
-    for item_name, price in items.get(shop_name, []):
-        item_button = tk.Button(items_frame, text=f"{item_name} (₩{price})", 
-                                command=lambda item_name=item_name, price=price: add_to_cart(item_name, price))
-        item_button.pack(pady=5)
+def update_cart_display():
+    # Clear the current cart display
+    cart_display.delete(1.0, tk.END)
+    
+    total_cost = 0  # Initialize total cost
+    for cart_item in cart:
+        # Calculate total cost for each item
+        item_total = cart_item['price'] * cart_item['quantity']
+        total_cost += item_total
+
+        # Display item details in the cart
+        cart_display.insert(tk.END, f"{cart_item['name']} x {cart_item['quantity']} - ₩{item_total}\n")
+
+    # Add the runner fee
+    runner_fee = 2000
+    total_cost += runner_fee
+    
+    # Update the total label
+    total_label.config(text=f"Total: ₩{total_cost}")
 
 # Create the main window (root)
 root = tk.Tk()
 root.title("KU Runner")
+root.config(bg="maroon")
 
 # Create Shop Selection Dropdown
-shop_label = tk.Label(root, text="Select Shop", font=("Arial", 14))
+shop_label = tk.Label(root, text="KU RUNNER", font=("Arial", 16), bg="maroon", fg="white")
 shop_label.pack(pady=10)
 
-shop_dropdown = tk.StringVar(root)
-shop_dropdown.set("Mom's Touch")  # Default shop
-shop_menu = tk.OptionMenu(root, shop_dropdown, "Ari Cafe Media Hall", "Mom's Touch", "Unistore", "EMart", "Pound Coffee", "GS25", command=update_items)
-shop_menu.pack(pady=10)
+shop_dropdown = ttk.Combobox(root, values=list(shops.keys()), font=("Arial", 12))
+shop_dropdown.pack(pady=5)
+shop_dropdown.bind("<<ComboboxSelected>>", on_shop_select)
 
-# Create a frame for displaying items from the selected shop
-items_frame = tk.Frame(root)
-items_frame.pack(pady=10)
+# Frame to display shop items
+item_frame = tk.Frame(root, bg="yellow")
+item_frame.pack(pady=10, fill="x")
 
-# Create labels to display the total cost
+# Create labels to display the cart and total cost
 total_label = tk.Label(root, text="Total: ₩0", font=("Arial", 14))
 total_label.pack(pady=10)
+
+# Cart display frame
+cart_frame = tk.Frame(root, bg="white")
+cart_frame.pack(pady=10, fill="x")
+
+# Cart display in a Text widget to show items
+cart_display = tk.Text(cart_frame, height=10, width=40, font=("Arial", 12), wrap="word")
+cart_display.pack()
 
 # Create buttons for sending the order and exiting
 send_order_button = tk.Button(root, text="Send Order", font=("Arial", 14), command=send_order)
