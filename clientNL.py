@@ -14,6 +14,12 @@ runner_fee = 2000  # Runner fee for each order
 # Create a TCP socket
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+# Function to connect to the server
+def connect_to_server():
+    client_socket.connect((SERVER_IP, SERVER_PORT))
+    threading.Thread(target=receive_messages, args=(client_socket,), daemon=True).start()
+    print("Connected to server.")
+    
 # Function to handle receiving messages from the server
 def receive_messages(sock):
     while True:
@@ -65,12 +71,6 @@ def show_incoming_order(order):
         client_socket.send("accept".encode())
     else:
         client_socket.send("reject".encode())
-
-# Function to connect to the server
-def connect_to_server():
-    client_socket.connect((SERVER_IP, SERVER_PORT))
-    threading.Thread(target=receive_messages, args=(client_socket,), daemon=True).start()
-    print("Connected to server.")
 
 # Function to update the displayed total cost (including runner fee)
 def update_total():
