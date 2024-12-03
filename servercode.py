@@ -95,7 +95,6 @@ def handle_client(client_socket, client_address):
                         found_order = True
                         runner_socket = order_list[order_id]["runner"]
                         customer_socket = order_list[order_id]["customer"]
-
             
                         print("Sent request confirmation")
                         runner_socket.send("Have you finished the request?".encode())

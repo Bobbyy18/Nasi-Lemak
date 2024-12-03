@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 # Server configuration
-SERVER_IP = '192.168.219.104'  # Must align with server IP address
+SERVER_IP = '172.30.1.56'  # Must align with server IP address
 SERVER_PORT = 12153
 
 # Variables to hold quantities and prices of items in cart
@@ -36,6 +36,15 @@ def receive_messages(sock):
                         client_socket.send("yes".encode())  
                     else:
                         client_socket.send("no".encode())
+
+                elif "Have you received your order?" in message:
+                    response = messagebox.askquestion("Order Status", f"{message}")
+                    if response == "yes":
+                        client_socket.send("received".encode())  
+                    else:
+                        client_socket.send("not received".encode())
+                        
+
                 elif "You have successfully finished a request. Runner fee is rewarded" in message:
                     messagebox.showinfo("Order status", f"{message}")
                     print("Request finished")
@@ -103,6 +112,10 @@ def send_order():
 def show_order_sent():
     messagebox.showinfo("Order Sent", "Your order has been successfully sent.")
 
+def disconnecting():
+    client_socket.send("disconnect".encode())
+    print("Sending disconnecting message")
+
 # Function to exit the program
 def exit_program():
     root.quit()
@@ -152,7 +165,7 @@ total_label.pack(pady=10)
 send_order_button = tk.Button(root, text="Send Order", font=("Arial", 14), command=send_order)
 send_order_button.pack(pady=20)
 
-exit_button = tk.Button(root, text="EXIT", font=("Arial", 14), command=exit_program)
+exit_button = tk.Button(root, text="EXIT", font=("Arial", 14), command=disconnecting)
 exit_button.pack(pady=10)
 
 # Connect to the server
