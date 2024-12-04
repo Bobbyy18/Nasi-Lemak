@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 
 # Server configuration
-SERVER_IP = '192.168.219.104'  # Must align with server IP address
+SERVER_IP = '192.168.219.101'  # Must align with server IP address
 SERVER_PORT = 12153
 
 # Variables to hold quantities and prices of items in cart
@@ -96,37 +96,43 @@ def remove_from_cart(item_name):
     global cart
     cart = [item for item in cart if item['name'] != item_name]
     update_total()
-    
+
+#Function to send order to server
 def send_order():
     if not cart:
         messagebox.showwarning("Invalid Order", "Please select at least one item before sending the order.")
         return
     
-    order = "ORDER -> "
+    # Retrieve name and location inputs
+    customer_name = name_entry.get().strip()
+    selected_location = location_dropdown.get().strip()
+
+    if not customer_name:
+        messagebox.showwarning("Invalid Input", "Please enter your name.")
+        return
+
+    if selected_location == "Select a Location":
+        messagebox.showwarning("Invalid Input", "Please select a valid location.")
+        return
+
+    # Build the order string
+    order = f"ORDER from {customer_name} at {selected_location} -> "
     total_cost = 0  # Initialize total cost
 
-    # Iterate over the cart
     for cart_item in cart:
-        # Extract item details
         item_name = cart_item['name']
         item_price = cart_item['price']
         item_quantity = cart_item['quantity']
-        item_total = item_price * item_quantity  # Total for this item
+        item_total = item_price * item_quantity
 
-        # Add to the order string
         order += f"{item_name}: {item_quantity} x ₩{item_price}, "
-        
-        # Add to the total cost
         total_cost += item_total
 
-    # Add runner fee to total
-    runner_fee = 2000
+    # Add runner fee
     total_cost += runner_fee
-
-    # Add the total cost to the order string
     order += f"Total: ₩{total_cost}"
 
-    # Send the order to the server
+    # Send order to the server
     client_socket.send(order.encode())
     print(f"Order sent to server: {order}")
     show_order_sent()
@@ -193,17 +199,45 @@ root = tk.Tk()
 root.title("KU Runner")
 root.config(bg="maroon")
 
+# Name Entry
+name_label = tk.Label(root, text="KU Runner", font=("Arial", 14), bg="maroon", fg="white")
+name_label.pack(pady=5)
+
+name_entry = tk.Entry(root, font=("Arial", 12))
+name_entry.pack(pady=5)
+name_entry.insert(0, "Enter your name")  # Add placeholder/default text
+
+# Clear the default text when the user clicks the entry field
+def clear_placeholder(event):
+    if name_entry.get() == "Enter your name":
+        name_entry.delete(0, tk.END)
+
+# Bind the Entry widget to clear placeholder text on focus
+name_entry.bind("<FocusIn>", clear_placeholder)
+
+#location selections
+locations = ["Aegineung Student Hall","Science Library","Informatics Hall", "Woodang Hall", "International Studies Hall"]
+
+# Location Dropdown
+location_label = tk.Label(root, bg="maroon", fg="white")
+location_label.pack(pady=5)
+
+location_dropdown = ttk.Combobox(root, values=locations, font=("Arial", 12))
+location_dropdown.pack(pady=5)
+location_dropdown.set("Select a Location")  # Default text
+
 # Create Shop Selection Dropdown
-shop_label = tk.Label(root, text="KU RUNNER", font=("Arial", 16), bg="maroon", fg="white")
-shop_label.pack(pady=10)
+shop_label = tk.Label(root, bg="maroon", fg="white")
+shop_label.pack(pady=5)
 
 shop_dropdown = ttk.Combobox(root, values=list(shops.keys()), font=("Arial", 12))
 shop_dropdown.pack(pady=5)
 shop_dropdown.bind("<<ComboboxSelected>>", on_shop_select)
+shop_dropdown.set("Select Shop")  # Default text
 
 # Frame to display shop items
 item_frame = tk.Frame(root, bg="yellow")
-item_frame.pack(pady=10, fill="x")
+item_frame.pack(pady=5, fill="x")
 
 # Create labels to display the cart and total cost
 total_label = tk.Label(root, text="Total: ₩0", font=("Arial", 14))
@@ -214,15 +248,15 @@ cart_frame = tk.Frame(root, bg="white")
 cart_frame.pack(pady=10, fill="x")
 
 # Cart display in a Text widget to show items
-cart_display = tk.Text(cart_frame, height=10, width=40, font=("Arial", 12), wrap="word")
+cart_display = tk.Text(cart_frame, height=5, width=30, font=("Arial", 12), wrap="word")
 cart_display.pack()
 
 # Create buttons for sending the order and exiting
 send_order_button = tk.Button(root, text="Send Order", font=("Arial", 14), command=send_order)
-send_order_button.pack(pady=20)
+send_order_button.pack(pady=10)
 
 exit_button = tk.Button(root, text="EXIT", font=("Arial", 14), command=disconnecting)
-exit_button.pack(pady=10)
+exit_button.pack(pady=5)
 
 # Connect to the server
 connect_to_server()
