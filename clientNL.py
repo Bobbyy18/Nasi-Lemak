@@ -23,10 +23,15 @@ def connect_to_server():
         # Start a thread to receive messages from the server
         threading.Thread(target=receive_messages, args=(client_socket,), daemon=True).start()
         print("Connected to server.")
+        # Start the GUI event loop
+        root.mainloop()
+
+
     except (socket.timeout, socket.error) as e:
         # Handle connection errors
         print("You cannot connect to the server because you are out of range.")
         print("Please keep your device connected to Korea University Wifi.")
+        messagebox.showinfo("Error","Out of range\n Cannot connect to server")
 
     
 # Function to handle receiving messages from the server
@@ -275,5 +280,3 @@ exit_button.pack(pady=5)
 # Connect to the server
 connect_to_server()
 
-# Start the GUI event loop
-root.mainloop()
