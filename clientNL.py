@@ -13,12 +13,21 @@ runner_fee = 2000  # Runner fee for each order
 
 # Create a TCP socket
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client_socket.settimeout(5)  # Set timeout to 5 seconds
 
 # Function to connect to the server
 def connect_to_server():
-    client_socket.connect((SERVER_IP, SERVER_PORT))
-    threading.Thread(target=receive_messages, args=(client_socket,), daemon=True).start()
-    print("Connected to server.")
+    try:
+        # Attempt to connect to the server
+        client_socket.connect((SERVER_IP, SERVER_PORT))
+        # Start a thread to receive messages from the server
+        threading.Thread(target=receive_messages, args=(client_socket,), daemon=True).start()
+        print("Connected to server.")
+    except (socket.timeout, socket.error) as e:
+        # Handle connection errors
+        print("You cannot connect to the server because you are out of range.")
+        print("Please keep your device connected to Korea University Wifi.")
+
     
 # Function to handle receiving messages from the server
 def receive_messages(sock):
