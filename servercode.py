@@ -195,16 +195,17 @@ print("Server is listening for connections...")
 while True:
     # Accept new client connections
     allowed_range = '172.30.'
+    
+    client_socket, client_address = server_socket.accept()
+    print(f"Connected to {client_address}")
+
+    # Add the client to the list
+    clients.append(client_socket)
+
     if not client_address[0].startswith(allowed_range):
         print("Rejecting connection from outside")
         client_socket.close()
-    else:
-        client_socket, client_address = server_socket.accept()
-        print(f"Connected to {client_address}")
 
-        # Add the client to the list
-        clients.append(client_socket)
-
-        # Start a new thread to handle messages from this client
-        client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
-        client_thread.start()
+    # Start a new thread to handle messages from this client
+    client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
+    client_thread.start()
