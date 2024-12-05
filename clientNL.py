@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 
 # Server configuration
-SERVER_IP = '192.168.219.101'  # Must align with server IP address
+SERVER_IP = '172.30.1.102'  # Must align with server IP address
 SERVER_PORT = 12153
 
 # Variables to hold quantities and prices of items in cart
@@ -26,16 +26,21 @@ def receive_messages(sock):
         try:
             # Receive message from the server
             message = sock.recv(1024).decode()
+
             if message:
                 if message == "Request has been accepted by another runner." :
                     messagebox.showinfo("Notification", message)
                     print("Failed to accept request")
-                elif "You accepted the order. " in message:
+
+                elif "You accepted the order." in message:
+                    print(f"Received message: {message}")
                     messagebox.showinfo("Notification", message)
                     print("Accepted request")
+
                 elif "Your order has been accepted by a runner" in message:
                     messagebox.showinfo("Notification", message)
                     print("Order is received by runner")
+
                 elif "Have you finished the request?" in message:
                     response = messagebox.askquestion("Order Status", f"{message}")
                     if response == "yes":
@@ -48,16 +53,17 @@ def receive_messages(sock):
                     if response == "yes":
                         client_socket.send("received".encode())  
                     else:
-                        client_socket.send("not received".encode())
-                        
+                        client_socket.send("not received".encode())         
 
                 elif "You have successfully finished a request. Runner fee is rewarded" in message:
                     messagebox.showinfo("Order status", f"{message}")
                     print("Request finished")
                     exit_program()
+
                 elif "Done" in message:
                     print("Exiting")
                     exit_program()
+
                 else:
                     # Show notification about the received order
                     show_incoming_order(message)
@@ -80,15 +86,16 @@ def update_total():
     
 #Function to add to cart   
 def add_to_cart(item, price):
+    selected_shop = shop_dropdown.get()
     # Check if the item already exists in the cart
     for cart_item in cart:
-        if cart_item['name'] == item:  # Check by item name
+        if cart_item['name'] == item and cart_item['shop'] == selected_shop:  # Check by item name
             cart_item['quantity'] += 1  # Increment quantity
             update_cart_display()  # Update the display
             return
 
     # If item is not found, add it as a new entry (as a dictionary)
-    cart.append({'name': item, 'price': price, 'quantity': 1})
+    cart.append({'shop': selected_shop,'name': item, 'price': price, 'quantity': 1})
     update_cart_display()  # Update the display
 
 # Function to remove an item from the cart
@@ -120,12 +127,13 @@ def send_order():
     total_cost = 0  # Initialize total cost
 
     for cart_item in cart:
+        shop_name = cart_item['shop']
         item_name = cart_item['name']
         item_price = cart_item['price']
         item_quantity = cart_item['quantity']
         item_total = item_price * item_quantity
 
-        order += f"{item_name}: {item_quantity} x ₩{item_price}, "
+        order += f"[{shop_name}]{item_name}: {item_quantity} x ₩{item_price}, "
         total_cost += item_total
 
     # Add runner fee
@@ -135,10 +143,6 @@ def send_order():
     # Send order to the server
     client_socket.send(order.encode())
     print(f"Order sent to server: {order}")
-    show_order_sent()
-
-# Function to show the order sent confirmation pop-up
-def show_order_sent():
     messagebox.showinfo("Order Sent", "Your order has been successfully sent.")
 
 def disconnecting():
@@ -166,7 +170,7 @@ def update_item_buttons(shop_name):
     if shop_name in shops:
         for item, price in shops[shop_name]:
             item_button = tk.Button(item_frame, text=f"{item} - ₩{price}", font=("Arial", 12),
-                                    command=lambda item=item, price=price: add_to_cart(item, price))
+                                    command=lambda item=item, price=price, shop=shop_name: add_to_cart(item, price))
             item_button.pack(fill="x", pady=5)
             
 # Function to handle dropdown selection change
