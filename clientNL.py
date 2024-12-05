@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 
 # Server configuration
-SERVER_IP = '172.30.1.102'  # Must align with server IP address
+SERVER_IP = '172.30.1.56'  # Must align with server IP address
 SERVER_PORT = 12153
 
 # Variables to hold quantities and prices of items in cart
@@ -28,9 +28,10 @@ def receive_messages(sock):
             message = sock.recv(1024).decode()
 
             if message:
-                if message == "Request has been accepted by another runner." :
-                    messagebox.showinfo("Notification", message)
+                if message == "Request has been accepted by another runner.":
                     print("Failed to accept request")
+                    messagebox.showinfo("Notification", message)
+                    
 
                 elif "You accepted the order." in message:
                     print(f"Received message: {message}")
