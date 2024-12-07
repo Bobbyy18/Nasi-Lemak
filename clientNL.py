@@ -66,14 +66,17 @@ def receive_messages(sock):
                 elif "Have you received your order?" in message:
                     response = messagebox.askquestion("Order Status", f"{message}")
                     if response == "yes":
-                        client_socket.send("received".encode())  
+                        client_socket.send("complete".encode())  
                     else:
-                        client_socket.send("not received".encode())         
+                        client_socket.send("not complete".encode())         
 
                 elif "You have successfully finished a request. Runner fee is rewarded" in message:
                     messagebox.showinfo("Order status", f"{message}")
                     print("Request finished")
                     exit_program()
+                
+                elif "Please complete the request before disconnecting" in message:
+                    messagebox.showinfo("Order status","Please complete the request before disconnecting")
 
                 elif "Done" in message:
                     print("Exiting")
@@ -92,7 +95,7 @@ def show_incoming_order(order):
         client_socket.send("accept".encode())
     else:
         client_socket.send("reject".encode())
-        messagebox.showinfo("You rejected the request.")
+        messagebox.showinfo("Notifications","You rejected the request.")
 
 # Function to update the displayed total cost (including runner fee)
 def update_total():
