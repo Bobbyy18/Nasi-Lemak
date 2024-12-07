@@ -19,5 +19,9 @@ video 1: video with explaination of how cisco works
 video 2: video without explaination
 video 3: screen recording of cisco
 
-Coding video:
-1. out of order situation: one client is not connected to korea university's wifi so it is out of server
+demo video:
+video 1: out of order situation: one client is not connected to korea university's wifi so it is out of server
+video 2: to show broadcast message is shown to every device.
+video 3: when runner finished request, and exit button is pressed, message will pop up.
+video 4: explaination 1(IMRAN MUST LISTEN)
+video 5: explaination 2 (IMRAN MUST LISTEN )
