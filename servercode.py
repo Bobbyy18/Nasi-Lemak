@@ -182,7 +182,7 @@ print("Server is listening for connections...")
 
 while True:
     # Accept new client connections
-    allowed_range = '172.30.'
+    allowed_range = '10.121.'
     
     client_socket, client_address = server_socket.accept()
     print(f"Connected to {client_address}")
