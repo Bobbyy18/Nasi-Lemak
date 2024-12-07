@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import messagebox, ttk
 
 # Server configuration
-SERVER_IP = '172.30.1.56'  # Must align with server IP address
+SERVER_IP = '10.121.130.235'  # Must align with server IP address
 SERVER_PORT = 12153
 
 # Variables to hold quantities and prices of items in cart
@@ -92,6 +92,7 @@ def show_incoming_order(order):
         client_socket.send("accept".encode())
     else:
         client_socket.send("reject".encode())
+        messagebox.showinfo("You rejected the request.")
 
 # Function to update the displayed total cost (including runner fee)
 def update_total():
