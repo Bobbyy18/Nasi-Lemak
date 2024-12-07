@@ -14,3 +14,10 @@ Cisco scenario video:
 1. The client send order to server and when the data is sent back to server, it means that the order has been accepted.
 2. The server sent information that there is an order to all devices that is connected to the server.
 3. When a device has accepted order, means that the device is the runner.
+cisco video:
+video 1: video with explaination of how cisco works 
+video 2: video without explaination
+video 3: screen recording of cisco
+
+Coding video:
+1. out of order situation: one client is not connected to korea university's wifi so it is out of server
