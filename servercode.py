@@ -105,7 +105,7 @@ def handle_client(client_socket, client_address):
                             orderConfirmation = customer_socket.recv(1024).decode()
                             print(f"Order confirmation received :{orderConfirmation}")
 
-                            if orderConfirmation == "received":
+                            if orderConfirmation == "complete":
                                 runner_socket.send("You have successfully finished a request. Runner fee is rewarded".encode())
                                 order_list[order_id]["status"] = "completed"
                                 print(f"Order {order_id} completed")
