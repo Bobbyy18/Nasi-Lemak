@@ -152,18 +152,6 @@ def handle_client(client_socket, client_address):
                                 client_socket.send("Done".encode())
                             client_socket.close()
                             break
-            """
-            elif message.startswith("ORDER"):
-                # Print the received order with the client's IP and port
-                print(f"Received order from {client_address[0]}, {client_address[1]} : {message}")
-                order_id = len(order_list)+1
-                order_list[order_id]={"order id": order_id,"customer":client_socket,"runner":None,"status":"pending"}
-                print(order_list)
-
-                # Store the current order for sending later
-                current_order = message
-                # Broadcast the order to all other clients
-                broadcast(message, client_socket)"""
        
         except Exception as e:
             # If there's an error with the client connection, log and remove it
